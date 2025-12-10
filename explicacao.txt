@@ -1,0 +1,29 @@
+--------------------------------------Linha(s),Código,Explicação------------------------------------------------
+1-4,import fs... import dotenv,"Importação de Módulos: O código importa as bibliotecas necessárias: fs (para manipular arquivos de sistema), readline (para interagir com o terminal), express (para criar o servidor web) e dotenv (para gerenciar variáveis de ambiente)."
+6,dotenv.config(),Carrega .env: Lê e carrega as variáveis definidas em um arquivo .env (se existir) para o ambiente de execução.
+8,const modo = process.argv[2],"Define o Modo: Captura o terceiro argumento passado ao executar o script (por exemplo, web ou terminal) e o armazena na variável modo. É isso que decide qual bloco de código será executado."
+10-11,const server = express()...,Inicia o Express: Cria a instância do servidor web. O server.use(express.json()) é crucial para que o servidor consiga ler dados enviados em formato JSON no corpo das requisições (POST/PUT).
+13,`const PORT = ...,
+15,"const ARQUIVO = ""assinaturas.txt""",Define o Arquivo de Dados: Nome do arquivo onde todas as assinaturas serão salvas.
+-----------------------------------Função,Código,Explicação Detalhada-----------------------------------------------------
+ler(),"if (!fs.existsSync(ARQUIVO)) fs.writeFileSync(ARQUIVO, """")","Garante a Existência: Verifica se o arquivo assinaturas.txt existe. Se não, o cria vazio."
+,"const dados = fs.readFileSync(ARQUIVO, ""utf-8"")",Lê o Conteúdo: Lê todo o conteúdo do arquivo como uma string.
+,"if (dados.trim() === """") return []","Trata Vazio: Se o arquivo lido estiver vazio, retorna um array vazio ([])."
+,"return dados.split(""\n"").map(l => JSON.parse(l))","Processa Dados: Divide a string lida em linhas (\n) e, para cada linha, usa JSON.parse(l) para convertê-la de volta para um objeto JavaScript. Retorna a lista de objetos."
+salvar(lista),"const texto = lista.map(i => JSON.stringify(i)).join(""\n"")","Prepara para Salvar: Pega a lista de objetos, converte cada objeto para uma string JSON (JSON.stringify(i)) e as une em um único texto, separando cada registro por uma quebra de linha (\n)."
+,"fs.writeFileSync(ARQUIVO, texto)",Escreve no Arquivo: Sobrescreve o arquivo assinaturas.txt com o novo texto formatado.
+-----------------------------------Função/Bloco,Ação,Detalhes----------------------------------------------------------
+28-31,const rl = readline.createInterface(...),Interface Interativa: Cria uma interface para que o programa possa enviar mensagens (output) e receber comandos/respostas (input) do usuário no console.
+cadastrar(),"Adicionar Assinatura: Pede o Serviço, Valor e Vencimento em sequência. No final, chama ler(), adiciona um novo item com um ID baseado no tempo atual (Date.now()), chama salvar() e volta para o menu.",
+listar(),Mostrar Assinaturas: Chama ler() para obter a lista atual e a exibe no console.,
+atualizar(),"Modificar Assinatura: Pede o ID. Procura o índice do item na lista (findIndex). Se encontrado, pede os novos dados e usa o spread operator (...) para misturar os novos dados com os antigos no item da lista antes de salvar().",
+excluir(),"Remover Assinatura: Pede o ID. Usa o método filter para criar uma nova lista excluindo o item com o ID fornecido, e depois chama salvar().",
+menu(),Navegação: Exibe as opções (1 a 5). Aguarda a resposta do usuário e usa uma estrutura if/else if para chamar a função correta. A opção 5 encerra o programa (process.exit()).,
+110,menu(),Início: Chama a função menu para iniciar o loop de interação do terminal.
+-------------------------------------Rota/Função,Método,Explicação-------------------------------------------------------
+"server.get(""/"")",GET,Home: Rota básica que retorna uma mensagem de boas-vindas.
+"server.get(""/assinaturas"")",GET,"READ (Leitura): Retorna a lista completa de assinaturas em formato JSON, chamando a função ler()."
+"server.post(""/assinaturas"")",POST,"CREATE (Criação): Recebe os dados de uma nova assinatura no corpo da requisição (req.body). Adiciona o id: Date.now(), salva a lista atualizada e retorna o novo objeto JSON criado."
+"server.put(""/assinaturas/:id"")",PUT,"UPDATE (Atualização): O ID da assinatura a ser atualizada é pego do URL (req.params.id). O código busca o item. Se o ID não for encontrado, retorna um erro 404. Caso contrário, mescla os dados recebidos com o objeto existente e salva."
+"server.delete(""/assinaturas/:id"")",DELETE,"DELETE (Exclusão): O ID é pego do URL. A função ler() é chamada, e um filter é usado para excluir o item com o ID. A nova lista é salva."
+"server.listen(PORT, ...)",-,Inicia o Servidor: Coloca o servidor Express para escutar por requisições HTTP na porta configurada (padrão 3000) e exibe uma mensagem no console.
